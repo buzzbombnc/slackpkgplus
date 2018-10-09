@@ -2,6 +2,7 @@
 - name: validate slackpkg+ is installed
   command: '/usr/sbin/slackpkg help'
   changed_when: False
+  check_mode: no
   register: slackpkgout
 
 - block:
