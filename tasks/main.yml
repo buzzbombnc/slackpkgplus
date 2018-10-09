@@ -1,0 +1,47 @@
+---
+- name: validate slackpkg+ is installed
+  command: '/usr/sbin/slackpkg help'
+  changed_when: False
+  register: slackpkgout
+
+- block:
+  - name: locate the current version of slackpkg+
+    uri:
+      url: "{{ slackpkgplus_base_url }}{{ slackpkgplus_major_version }}/PACKAGES.TXT"
+      return_content: yes
+    register: spppackages
+
+  - tempfile: state=directory
+    register: sppptemp
+
+  - name: download slackpkg+
+    get_url:
+      url: "{{ slackpkgplus_base_url }}{{ slackpkgplus_major_version }}/pkg/{{ spppackages.content | regex_search('(slackpkg\\+-\\S*)') }}"
+      dest: "{{ sppptemp.path }}"
+
+  - name: Installing slackpkg+
+    command: "/sbin/upgradepkg --install-new {{ spppackages.content | regex_search('(slackpkg\\+-\\S*)') }} chdir={{ sppptemp.path }}"
+
+  - file:
+      path: "{{ sppptemp.path }}"
+      state: absent
+  when: slackpkgout.stdout.find('slackpkg+') == -1
+
+- name: update slackpkg+ configuration
+  blockinfile:
+    path: /etc/slackpkg/slackpkgplus.conf
+    mode: 0644
+    owner: root
+    group: root
+    content: |
+      {% for k, v in slackpkgplus_repos.iteritems() %}
+      MIRRORPLUS[{{ k }}]={{ v }}
+      {% endfor %}
+      {% if slackpkgplus_enabled_repos is defined %}
+      REPOPLUS=( {{ slackpkgplus_enabled_repos | join(' ') }} )
+      {% else %}
+      REPOPLUS=( slackpkgplus {{ slackpkgplus_repos.keys() | join(' ') }} )
+      {% endif %}
+  notify:
+    - update slackpkg GPG key
+    - update slackpkg

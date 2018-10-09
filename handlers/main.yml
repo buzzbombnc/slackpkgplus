@@ -1,0 +1,8 @@
+---
+- name: update slackpkg GPG key
+  command: "/usr/sbin/slackpkg -batch=on update gpg"
+  changed_when: False
+
+- name: update slackpkg
+  command: "/usr/sbin/slackpkg -batch=on -default_answer=y update"
+  changed_when: False

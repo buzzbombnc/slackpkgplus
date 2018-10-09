@@ -1,0 +1,10 @@
+---
+- hosts: localhost
+  become: true
+  vars:
+    slackpkgplus_repos:
+      slackpkgplus: "http://slakfinder.org/slackpkg+/"
+    slackpkgplus_enabled_repos:
+      - slackpkgplus
+  roles:
+    - slackpkgplus

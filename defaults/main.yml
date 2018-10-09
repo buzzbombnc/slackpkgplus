@@ -1,0 +1,5 @@
+---
+# The major version of slackpkg+.  (E.g. dev, 1.6, 1.7)
+slackpkgplus_major_version: ''
+# A dictionary of slackpkg+ repos: key is name, value is URL.
+slackpkgplus_repos: {}
