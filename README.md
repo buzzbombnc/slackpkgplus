@@ -21,7 +21,8 @@ Default Role Variables
 By default, the enabled repositories are all of the repos defined in `slackpkgplus_repos`, however you can also
 set `slackpkgplus_enabled_repos` to a _list_ of all the repositories that will be enabled in slackpkg+.
 
-:info: If you set `slackpkgplus_enabled_repos`, be sure to add the `slackpkgplus` repository for slackpkg+ updates!  It is not added automatically.
+:information_source: If you set `slackpkgplus_enabled_repos`, be sure to add the `slackpkgplus` repository for 
+slackpkg+ updates, if desired!  It will not be added automatically.
 
 
 Role Variables
