@@ -1,41 +1,57 @@
 ---
 - name: validate slackpkg+ is installed
-  command: '/usr/sbin/slackpkg help'
+  ansible.builtin.command: '/usr/sbin/slackpkg help'
   changed_when: False
   check_mode: no
   register: slackpkgout
 
 - block:
+  # Version 1.7 is required for Slackware 14.  If not overridden elsewhere, make it so.
+  - name: set the slackpkg+ version for Slackware 14
+    ansible.builtin.set_fact:
+      slackpkgplus_major_version: "1.7"
+    when:
+      - ansible_distribution == 'Slackware'
+      - ansible_distribution_major_version == '14'
+      - slackpkgplus_major_version == ''
+
+  - name: set the slackpkg+ search URL
+    ansible.builtin.set_fact:
+      slackpkgplus_url: "{{ slackpkgplus_base_url + slackpkgplus_major_version }}"
+
   - name: locate the current version of slackpkg+
-    uri:
-      url: "{{ slackpkgplus_base_url }}{{ slackpkgplus_major_version }}/PACKAGES.TXT"
+    ansible.builtin.uri:
+      url: "{{ slackpkgplus_url }}/PACKAGES.TXT"
       return_content: yes
     register: spppackages
 
-  - tempfile: state=directory
+  - name: create a temporary directory for the download
+    ansible.builtin.tempfile:
+      state: directory
     register: sppptemp
 
   - name: download slackpkg+
-    get_url:
-      url: "{{ slackpkgplus_base_url }}{{ slackpkgplus_major_version }}/pkg/{{ spppackages.content | regex_search('(slackpkg\\+-\\S*)') }}"
+    ansible.builtin.get_url:
+      url: "{{ slackpkgplus_url }}/pkg/{{ spppackages.content | regex_search('(slackpkg\\+-\\S*)') }}"
       dest: "{{ sppptemp.path }}"
 
   - name: Installing slackpkg+
     command: "/sbin/upgradepkg --install-new {{ spppackages.content | regex_search('(slackpkg\\+-\\S*)') }} chdir={{ sppptemp.path }}"
 
-  - file:
+  - name: remove temporary directory
+    ansible.builtin.file:
       path: "{{ sppptemp.path }}"
       state: absent
   when: slackpkgout.stdout.find('slackpkg+') == -1
 
 - name: update slackpkg+ configuration
-  blockinfile:
+  ansible.builtin.blockinfile:
     path: /etc/slackpkg/slackpkgplus.conf
     mode: 0644
     owner: root
     group: root
     content: |
-      {% for k, v in slackpkgplus_repos.iteritems() %}
+      {% for k, v in slackpkgplus_repos.items() | list %}
       MIRRORPLUS[{{ k }}]={{ v }}
       {% endfor %}
       {% if slackpkgplus_enabled_repos is defined %}

@@ -6,7 +6,7 @@ Ansible role that bootstraps the installation of [slackpkg+](http://www.slakfind
 Requirements
 ------------
 
-* Slackware
+* Slackware 14.2 or 15.0.
 * `slackpkg` installed.
 * `become: true`
 

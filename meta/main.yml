@@ -9,7 +9,7 @@ galaxy_info:
   license: MIT
 
   # Probably works in earlier, but this is all I've tested.
-  min_ansible_version: 2.6
+  min_ansible_version: 2.13
 
   # If this a Container Enabled role, provide the minimum Ansible Container version.
   # min_ansible_container_version:
@@ -31,6 +31,7 @@ galaxy_info:
     - name: Slackware
       versions:
         - 14.2
+        - 15.0
 
   galaxy_tags:
     - slackware
